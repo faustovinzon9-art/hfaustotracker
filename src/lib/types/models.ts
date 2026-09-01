@@ -12,6 +12,42 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface Habit {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  position: number;
+  created_at: string;
+}
+
+export interface HabitLog {
+  id: string;
+  habit_id: string;
+  log_date: string; // date
+  done: boolean;
+  note: string | null;
+  created_at: string;
+}
+
+export interface ProgressPhoto {
+  id: string;
+  photo_url: string;
+  taken_at: string;
+  caption: string | null;
+  created_at: string;
+}
+
+export interface CustomAchievement {
+  id: string;
+  name: string;
+  icon: string;
+  description: string | null;
+  achieved: boolean;
+  achieved_at: string | null;
+  created_at: string;
+}
+
 /** Full row shape of the `measurements` table (snake_case columns). */
 export interface MeasurementRecord extends XiaomiS400Metrics {
   id: string;

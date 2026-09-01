@@ -14,6 +14,13 @@ import { EtaCard } from './EtaCard';
 import { WeightChart } from './WeightChart';
 import { HistoryList } from './HistoryList';
 import { MeasurementForm } from './MeasurementForm';
+import { CoachChat } from './CoachChat';
+import { HabitTracker } from './HabitTracker';
+import { WeeklyReportCard } from './WeeklyReportCard';
+import { ProgressPhotos } from './ProgressPhotos';
+import { ExportShare } from './ExportShare';
+import { CustomAchievements } from './CustomAchievements';
+import { Wrapped } from './Wrapped';
 import {
   computeEta,
   computeOverallProgress,
@@ -24,6 +31,8 @@ import {
 import { generateSargentMessage } from '@/lib/sargent';
 import {
   deleteMeasurement,
+  getHabitLogs,
+  getHabits,
   getMeasurements,
   getMilestones,
   getProfile,
@@ -31,7 +40,7 @@ import {
   resetAllData,
   updateProfile,
 } from '@/lib/supabase/repo';
-import type { MeasurementRecord, Milestone, Profile } from '@/lib/types/models';
+import type { Habit, HabitLog, MeasurementRecord, Milestone, Profile } from '@/lib/types/models';
 
 export const Dashboard = () => {
   const router = useRouter();
@@ -40,6 +49,8 @@ export const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [measurements, setMeasurements] = useState<MeasurementRecord[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [habitLogs, setHabitLogs] = useState<HabitLog[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -56,10 +67,17 @@ export const Dashboard = () => {
         router.replace('/onboarding');
         return;
       }
-      const [ms, mis] = await Promise.all([getMeasurements(), getMilestones()]);
+      const [ms, mis, hs, hls] = await Promise.all([
+        getMeasurements(),
+        getMilestones(),
+        getHabits(),
+        getHabitLogs(),
+      ]);
       setProfile(p);
       setMeasurements(ms);
       setMilestones(mis);
+      setHabits(hs);
+      setHabitLogs(hls);
     } catch (e) {
       setError((e as Error).message ?? 'Error al cargar los datos.');
     } finally {
@@ -237,6 +255,10 @@ export const Dashboard = () => {
 
         <SargentBanner message={sargentMessage} />
 
+        <WeeklyReportCard profile={profile} measurements={measurements} habits={habits} />
+
+        <ExportShare profile={profile} measurements={measurements} />
+
         {overall && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {overall.metrics.map((m) => (
@@ -266,16 +288,25 @@ export const Dashboard = () => {
           <WeightChart data={chartData} goalWeight={profile.goal_weight} />
         </GlassCard>
 
+        <HabitTracker habits={habits} onHabitsChange={setHabits} />
+
+        <CustomAchievements />
+
+        <ProgressPhotos />
+
+        <Wrapped profile={profile} measurements={measurements} habits={habits} habitLogs={habitLogs} />
+
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-apple-text">Historial de mediciones</h3>
-          <Button
+          <button
             onClick={() => {
               setEditing(null);
               setFormOpen(true);
             }}
+            className="inline-flex items-center gap-1 rounded-full bg-apple-accent text-white text-xs font-bold px-3 py-2 active:scale-95"
           >
             + Agregar
-          </Button>
+          </button>
         </div>
         <HistoryList
           measurements={measurements}
@@ -286,6 +317,20 @@ export const Dashboard = () => {
           onDelete={handleDelete}
         />
       </div>
+
+      {/* Floating add button */}
+      <button
+        onClick={() => {
+          setEditing(null);
+          setFormOpen(true);
+        }}
+        aria-label="Agregar medición"
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-apple-accent text-white text-3xl font-bold shadow-lg active:scale-95"
+      >
+        +
+      </button>
+
+      <CoachChat profile={profile} measurements={measurements} habits={habits} />
 
       <MeasurementForm
         open={formOpen}
