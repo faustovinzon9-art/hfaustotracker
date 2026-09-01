@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { XiaomiS400Metrics } from '@/packages/shared-types/xiaomi';
+import type { XiaomiS400Metrics } from '@/lib/types/xiaomi';
 
 // This is the system prompt used for the Vision-LLM
 const VISION_PROMPT = `
