@@ -5,8 +5,15 @@ import { verifySession, SESSION_COOKIE } from '@/lib/auth';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Public: login page, all API routes, and the not-found page.
-  if (pathname.startsWith('/login') || pathname.startsWith('/api') || pathname === '/_not-found') {
+  // Public: login page, all API routes, the not-found page, and PWA/static assets.
+  if (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/api') ||
+    pathname === '/_not-found' ||
+    pathname === '/sw.js' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/icon.svg'
+  ) {
     return NextResponse.next();
   }
 
