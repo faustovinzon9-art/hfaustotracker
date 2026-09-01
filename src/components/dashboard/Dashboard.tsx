@@ -21,6 +21,7 @@ import { ProgressPhotos } from './ProgressPhotos';
 import { ExportShare } from './ExportShare';
 import { CustomAchievements } from './CustomAchievements';
 import { Wrapped } from './Wrapped';
+import { SettingsModal } from './SettingsModal';
 import {
   computeEta,
   computeOverallProgress,
@@ -59,6 +60,30 @@ export const Dashboard = () => {
   const [goalInput, setGoalInput] = useState('80');
   const [resetOpen, setResetOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sargentLevel, setSargentLevelState] = useState(2);
+
+  const setSargentLevel = (n: number) => {
+    setSargentLevelState(n);
+    localStorage.setItem('hf_sargent', String(n));
+  };
+
+  useEffect(() => {
+    setSargentLevelState(Number(localStorage.getItem('hf_sargent') || '2') || 2);
+  }, []);
+
+  // Best-effort reminders: while the app is open, at 8:00 show a local notification.
+  useEffect(() => {
+    if (localStorage.getItem('hf_reminders') !== '1') return;
+    const check = () => {
+      const h = new Date().getHours();
+      if (h === 8 && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('HFausto Tracker', { body: '📋 ¿Ya te pesaste y marcaste tus hábitos hoy?' });
+      }
+    };
+    const id = setInterval(check, 60000);
+    return () => clearInterval(id);
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -124,17 +149,18 @@ export const Dashboard = () => {
     return newly ?? null;
   }, [achievedMilestones, latest, previous]);
 
-  const sargentMessage = useMemo(
-    () =>
-      generateSargentMessage({
-        current: latest,
-        previous,
-        progressPercent: overall?.overall ?? null,
-        justReachedMilestone,
-        goalWeight: profile?.goal_weight ?? 80,
-      }),
-    [latest, previous, overall, justReachedMilestone, profile]
-  );
+  const sargentMessage = useMemo(() => {
+    const base = generateSargentMessage({
+      current: latest,
+      previous,
+      progressPercent: overall?.overall ?? null,
+      justReachedMilestone,
+      goalWeight: profile?.goal_weight ?? 80,
+    });
+    const tone = sargentLevel >= 4 ? '💀🔥 ' : sargentLevel >= 3 ? '🔥 ' : sargentLevel === 1 ? '🫡 ' : '';
+    const extra = sargentLevel >= 3 ? ' ¡NO PARES!' : '';
+    return tone + base + extra;
+  }, [latest, previous, overall, justReachedMilestone, profile, sargentLevel]);
 
   const chartData = useMemo(
     () =>
@@ -223,17 +249,25 @@ export const Dashboard = () => {
   return (
     <main className="min-h-screen bg-apple-bg pb-24">
       <SargentHeader />
-      <div className="px-6 space-y-5">
+      <div className="px-6 space-y-5 hf-anim">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold uppercase tracking-wide text-apple-secondary">
             🎯 Objetivo: {profile.goal_weight} kg
           </div>
-          <button
-            onClick={() => setResetOpen(true)}
-            className="text-xs font-semibold text-apple-danger"
-          >
-            Reiniciar datos
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="text-xs font-semibold text-apple-text"
+            >
+              ⚙️
+            </button>
+            <button
+              onClick={() => setResetOpen(true)}
+              className="text-xs font-semibold text-apple-danger"
+            >
+              Reiniciar datos
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -369,6 +403,13 @@ export const Dashboard = () => {
           </div>
         </div>
       </Modal>
+
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        sargentLevel={sargentLevel}
+        onSargentLevel={setSargentLevel}
+      />
 
       <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="¿Reiniciar la app?">
         <div className="space-y-3">

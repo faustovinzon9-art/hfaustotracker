@@ -154,12 +154,16 @@ const PROGRESS_PHOTOS = 'progress_photos';
 const CUSTOM_ACHIEVEMENTS = 'custom_achievements';
 
 export async function getHabits(): Promise<Habit[]> {
-  const { data, error } = await getSupabaseClient()
-    .from(HABITS)
-    .select('*')
-    .order('position', { ascending: true });
-  if (error) throw error;
-  return (data as Habit[]) ?? [];
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from(HABITS)
+      .select('*')
+      .order('position', { ascending: true });
+    if (error) throw error;
+    return (data as Habit[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function createHabit(habit: Pick<Habit, 'name' | 'icon' | 'color'>): Promise<Habit> {
@@ -183,9 +187,13 @@ export async function deleteHabit(id: string): Promise<void> {
 }
 
 export async function getHabitLogs(): Promise<HabitLog[]> {
-  const { data, error } = await getSupabaseClient().from(HABIT_LOGS).select('*');
-  if (error) throw error;
-  return (data as HabitLog[]) ?? [];
+  try {
+    const { data, error } = await getSupabaseClient().from(HABIT_LOGS).select('*');
+    if (error) throw error;
+    return (data as HabitLog[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function setHabitLog(habitId: string, logDate: string, done: boolean): Promise<void> {
@@ -204,12 +212,16 @@ export async function deleteHabitLog(id: string): Promise<void> {
 const PROGRESS_PHOTO_BUCKET = 'progress-photos';
 
 export async function getProgressPhotos(): Promise<ProgressPhoto[]> {
-  const { data, error } = await getSupabaseClient()
-    .from(PROGRESS_PHOTOS)
-    .select('*')
-    .order('taken_at', { ascending: false });
-  if (error) throw error;
-  return (data as ProgressPhoto[]) ?? [];
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from(PROGRESS_PHOTOS)
+      .select('*')
+      .order('taken_at', { ascending: false });
+    if (error) throw error;
+    return (data as ProgressPhoto[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function uploadProgressPhoto(file: File, caption?: string): Promise<ProgressPhoto> {
@@ -238,12 +250,16 @@ export async function deleteProgressPhoto(id: string): Promise<void> {
 
 // ---- Custom achievements --------------------------------------------------
 export async function getCustomAchievements(): Promise<CustomAchievement[]> {
-  const { data, error } = await getSupabaseClient()
-    .from(CUSTOM_ACHIEVEMENTS)
-    .select('*')
-    .order('created_at', { ascending: true });
-  if (error) throw error;
-  return (data as CustomAchievement[]) ?? [];
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from(CUSTOM_ACHIEVEMENTS)
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data as CustomAchievement[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function createCustomAchievement(

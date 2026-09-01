@@ -58,4 +58,24 @@ body {
   .hf-surface {
     background: var(--hf-surface);
   }
+  .hf-anim {
+    animation: hf-fade-up 0.5s ease both;
+  }
+}
+
+@keyframes hf-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-anim {
+    animation: none;
+  }
 }
