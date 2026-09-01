@@ -63,18 +63,18 @@ export async function POST(req: NextRequest) {
     const mockData: XiaomiS400Metrics = {
       weight: 86.2, // Slightly increased
       bmi: 26.6,
-      bodyFatPercentage: 23.1,
-      muscleMass: 67.8,
-      musclePercentage: 75.9,
-      bodyWaterPercentage: 54.8,
-      proteinPercentage: 16.5,
-      boneMineralPercentage: 3.1,
-      skeletalMuscleMass: 51.5,
-      visceralFatRating: 11, // Increased - TRIGGER SARGENT
-      basalMetabolicRate: 1820,
-      waistToHipRatio: 0.94,
-      bodyAge: 35,
-      fatFreeBodyWeight: 63.1,
+      body_fat_percentage: 23.1,
+      muscle_mass: 67.8,
+      muscle_percentage: 75.9,
+      body_water_percentage: 54.8,
+      protein_percentage: 16.5,
+      bone_mineral_percentage: 3.1,
+      skeletal_muscle_mass: 51.5,
+      visceral_fat_rating: 11, // Increased - TRIGGER SARGENT
+      basal_metabolic_rate: 1820,
+      waist_to_hip_ratio: 0.94,
+      body_age: 35,
+      fat_free_body_weight: 63.1,
       timestamp: new Date().toISOString(),
     };
 
@@ -96,7 +96,7 @@ function evaluateSargentReaction(current: XiaomiS400Metrics): string {
   // In real implementation, we'd fetch the previous record from PostgreSQL
   const previousVisceralFat = 9;
 
-  if (current.visceralFatRating > previousVisceralFat) {
+  if (current.visceral_fat_rating > previousVisceralFat) {
     return "¡¿QUÉ ES ESTO?! ¡TU GRASA VISCERAL HA SUBIDO! ¡ESTÁS MATANDO TU CORAZÓN, PEDAZO de VAGO! ¡A CORRER 10K AHORA MISMO O NO VOLVERÁS A VER UN CARBOHIDRATO EN UN MES!";
   }
 
